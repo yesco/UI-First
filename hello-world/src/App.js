@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 
 function Apply(fun, args) {
-  console.log("APPLY(", fun, args, ")");
+//  console.log("APPLY(", fun, args, ")");
   // find any array pos loop over it's elements, recurse
   var i = 0;
   while (i < args.length && !(args[i] instanceof Array)) {
@@ -22,14 +22,14 @@ function Apply(fun, args) {
 
 //console.log(function(a){return a*a;}, [3]);
 
-function Run(prog, env, prev) {
+function Runn(prog, env, prev) {
   console.log("RUN=>", prog, env, prev);
   var r = Runn(prog, env, prev);
   console.log("<=RUN", r, "of", prog);
   return r;
 }
 
-function Runn(prog, env, prev) {
+function Run(prog, env, prev) {
   if (!prog) return;
   if (prog instanceof Ref) return Run(prog.val(env), env);
   if (prog instanceof Function) return prog;
@@ -91,8 +91,9 @@ function Program(props) {
     ;// later
   else if (typeof(prog) === 'object') {
     const rows = Object.keys(prog).map((key) => {
-      const label = <b style={{float: 'left', margin: '-5px', padding: '5px', 'font-size': '10px', background: 'white', border: '1px solid black', borderRadius: '5px', padding: '3px'}}>{key}:</b>;
+      const label = <b style={{float: 'left', margin: '-5px', padding: '5px', fontSize: '10px', background: 'white', border: '1px solid black', borderRadius: '5px', padding: '3px'}}>{key}:</b>;
 
+      if (!res[key]) return;
       return (
         <tr><td style={{background: 'lightgreen'}}>
           {key.match(/^_/) ? "" : label}
@@ -117,21 +118,26 @@ function Program(props) {
     color = 'cyan';
     txt = <i>{prog.name}</i>
   } else if (typeof prog === 'function') {
-    console.log("PROG", prog, prog instanceof Ref);
     color = '#66FF99';
-    txt = <b>{prog.name}</b>
+    function showSource(){
+      if (!window.editors.some((x) => (x == prog))) {
+        window.editors.push(prog);
+        window.changed();
+      }
+    }
+    txt = <b onClick={showSource} title="click to edit">{prog.name}</b>
   } else {
     color = 'red';
     txt = '' + prog;
   }
   return <div style={{padding: '6px'}}>
-    <div style={{'text-align': 'center', padding: '7px', background: color}}>
+    <div style={{textAlign: 'center', padding: '7px', background: color}}>
       {txt}
     </div>
   </div>;
 }
 
-function to(f, t){
+function to(f, t) {
   var i, r = [];
   for(i = f; i <= t; i++) {
     r.push(i);
@@ -157,8 +163,13 @@ function lt(x,y){ return x < y ? x : undefined; }
 function mult(a,b){ return a*b; }
 function plus(a,b){ return a+b; }
  
+window.funcs = [sqr, lt, mult, plus];
+
 class App extends Component {
   render() {
+
+    // TODO: move init out!
+    if (!window.editors) window.editors = [];
 
     var SQRLT = {
       '_a': [1, to, 10],
@@ -169,6 +180,7 @@ class App extends Component {
 
     var MULT = {
       a: [1, to, 3],
+      _a: ["*"],
       _aa: undefined,
       b: [1, to, 3],
       _b: ["="],
@@ -176,22 +188,33 @@ class App extends Component {
       c: [ref('a'), mult, ref('b')],
     };
 
-    var prog = MULT;
+    var prog = SQRLT; //MULT;
 
-    function Page(prog, res) {
+    function Page(prog, res, editors) {
+      var fs = window.funcs.map(function(f){
+        return <span> {f.name} </span>;
+      });
+      var eds = editors.map(function(f){
+        function remove(){ window.editors = window.editors.filter((x) => (x != f)); window.changed(); }
+        var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
+        var s = <span>function <b style={{background: 'lightgreen'}} onClick={remove}>{name_rest[1]}</b>{name_rest[2]}</span>;
+        return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>{s}</pre>
+      });
       return (
         <div className="App">
           <div className="App-header">
             <h2>UI-First</h2>
           </div>
+          <div>{fs}</div>
+          <br/><br/>
+          <div style={{float: 'right'}}>{eds}</div>
           <center><table><tbody><tr><td><Program prog={prog} res={res}/></td></tr></tbody></table></center>
         </div>
       );
     }
     
     var res = Run(prog);
-    console.log(res);
-    return Page(prog, res);
+    return Page(prog, res, window.editors);
   }
 }
 
