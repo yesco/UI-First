@@ -125,7 +125,7 @@ function Program(props) {
         window.changed();
       }
     }
-    txt = <b onClick={showSource} title="click to edit">{prog.name}</b>
+    txt = <b onClick={showSource} title={prog.doc}>{prog.name}</b>
   } else {
     color = 'red';
     txt = '' + prog;
@@ -135,14 +135,6 @@ function Program(props) {
       {txt}
     </div>
   </div>;
-}
-
-function to(f, t) {
-  var i, r = [];
-  for(i = f; i <= t; i++) {
-    r.push(i);
-  }
-  return r;
 }
 
 function Ref(name) {
@@ -158,10 +150,22 @@ function ref(name) {
 //{ var x = ref('a'); console.log(x(x)); }
 //console.log((ref('a')) instanceof Ref);
 
+function to(f, t) {
+  var i, r = [];
+  for(i = f; i <= t; i++) {
+    r.push(i);
+  }
+  return r;
+}
+to.doc = "Give the numbers in the interval, inclusive";
 function sqr(r){ return r*r;}
+sqr.doc = "Square the number";
 function lt(x,y){ return x < y ? x : undefined; }
+lt.doc = "Keep if less than";
 function mult(a,b){ return a*b; }
+mult.doc = "Multiply it with ";
 function plus(a,b){ return a+b; }
+plus.doc = "Plus it with ";
  
 window.funcs = [sqr, lt, mult, plus];
 
