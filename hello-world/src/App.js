@@ -10,17 +10,17 @@ import {funcs, Ref, Run} from './UI-lang';
 // => function/number
 function parseValue(s) {
   if (s === null) return s;
-  var f = funcs[s];
   var n = parseFloat(s);
-  if (f) return f;
-  else if (!isNaN(n)) return n;
+  var f = funcs[s];
+  if (!isNaN(n)) return n;
+  else if (f) return f;
   return s;
 }
 
 function Program(props) {
   var prog = props.prog;
   var res = props.res || [];
-  if (!prog) return null;
+  if (prog === null) return null;
 
   function showSource(e){
     e.preventDefault();
@@ -58,7 +58,7 @@ function Program(props) {
       // <td onContextMenu={del} delayLongPress={500} onLongPress={del}>
       // <hidden style={{marginLeft: '20px', marginTop: '-50px', fontSize: '13px'}} onClick={showSource}>definition</hidden>
       return (
-        <td className='ui' onClick={edit}>
+        <td key={i} className='ui' onClick={edit}>
           <Program prog={item} res={res[i]}/>
           <hidden onClick={del}>x</hidden>
         </td>
@@ -84,13 +84,13 @@ function Program(props) {
   else if (typeof(prog) === 'object') {
     // display row
     const rows = Object.keys(prog).map((key) => {
-      const label = <b style={{float: 'left', margin: '-5px', padding: '5px', fontSize: '10px', background: 'white', border: '1px solid black', borderRadius: '5px', padding: '3px'}}>{key}:</b>;
+      const label = <b key={key} style={{float: 'left', margin: '-5px', padding: '5px', fontSize: '10px', background: 'white', border: '1px solid black', borderRadius: '5px', padding: '3px'}}>{key}:</b>;
 
       if (!res[key]) return;
       return (
         <tr><td style={{background: 'lightgreen'}}>
           {key.match(/^_/) ? "" : label}
-          <Program prog={prog[key]} name={key} res={res[key]}/>
+          <Program key={key} prog={prog[key]} res={res[key]}/>
         </td></tr>
       );
     });

@@ -25,11 +25,14 @@ var MULT = {
   c: [ref('a'), L.mult, ref('b')],
 };
 
+var program = SQRLT;
+
 function changed() {
   ReactDOM.render(
-    <App prog={SQRLT} editors={window.editors}/>,
+    <App prog={program} editors={window.editors}/>,
     document.getElementById('root')
   );
+  console.log('program:', program);
 }
 
 window.changed = changed;
