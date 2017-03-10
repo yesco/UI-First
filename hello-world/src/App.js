@@ -5,6 +5,18 @@ import {funcs, Ref, Run} from './UI-lang';
 //console.log(Run([1, 2, function(a,b){return a+b;}]));
 //console.log(Run([1, 2, function(a,b){return a+b;}, function(a,b){return a*b;}, 5]));
 
+// TODO:move to UI-Lang?
+// take user input value and "guess" what it is
+// => function/number
+function parseValue(s) {
+  if (s === null) return s;
+  var f = funcs[s];
+  var n = parseFloat(s);
+  if (f) return f;
+  else if (!isNaN(n)) return n;
+  return s;
+}
+
 function Program(props) {
   var prog = props.prog;
   var res = props.res || [];
@@ -12,22 +24,33 @@ function Program(props) {
 
   // display columns
   if (prog instanceof Array) {
-    const cols = prog.map((item, i) =>
-      <td>
-        <Program prog={item} res={res[i]}/>
-      </td>
-    );
+    const cols = prog.map((item, i) => {
+      function del(e) {
+        e.preventDefault();
+        prog.splice(i, 1);
+        window.changed();
+      }
+      function edit(e) {
+        e.preventDefault();
+        var v = prog[i];
+        v = v instanceof Function ? v.name : v;
+        v = parseValue(prompt("New value:", v));
+        if (v === null) return;
+        prog[i] = v;
+        window.changed();
+      }
+      // onLongPress only work on touch?
+      // <td onContextMenu={del} delayLongPress={500} onLongPress={del}>
+      return (
+        <td xonContextMenu={del} onClick={edit}>
+          <Program prog={item} res={res[i]}/>
+        </td>
+      );
+    });
+
     function add() {
-      var s = prompt("Add Expression");
-      if (s === undefined) return;
-
-      var v;
-      var f = funcs[s];
-      var n = parseInt(s);
-      if (f) v = f
-      else if (!isNaN(n)) v = n;
-      else v = s;
-
+      var v = parseValue(prompt("Add Expression"));
+      if (v === null) return;
       prog.push(v);
       window.changed();
     }
@@ -79,12 +102,12 @@ function Program(props) {
   } else if (typeof prog === 'function') {
     color = '#66FF99';
     function showSource(){
-      if (!window.editors.some((x) => (x == prog))) {
+      if (!window.editors.some((x) => (x === prog))) {
         window.editors.push(prog);
         window.changed();
       }
     }
-    txt = <b onClick={showSource} title={prog.doc}>{prog.name}</b>
+    txt = <b onDrag={showSource} title={prog.doc}>{prog.name}</b>
   } else {
     color = 'red';
     txt = '' + prog;
