@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import {funcs, ref, Ref} from './UI-lang';
 
 function Apply(fun, args) {
 //  console.log("APPLY(", fun, args, ")");
@@ -22,14 +23,14 @@ function Apply(fun, args) {
 
 //console.log(function(a){return a*a;}, [3]);
 
-function Runn(prog, env, prev) {
+function Run(prog, env, prev) {
   console.log("RUN=>", prog, env, prev);
   var r = Runn(prog, env, prev);
   console.log("<=RUN", r, "of", prog);
   return r;
 }
 
-function Run(prog, env, prev) {
+function Runn(prog, env, prev) {
   if (!prog) return;
   if (prog instanceof Ref) return Run(prog.val(env), env);
   if (prog instanceof Function) return prog;
@@ -137,89 +138,31 @@ function Program(props) {
   </div>;
 }
 
-function Ref(name) {
-  this.val = function(env) { return env ? env[name] : undefined; }
-  this.name = name;
-}
+function App(props) {
+  var prog = props.prog;
+  var res = Run(prog);
+  var editors = props.editors;
 
-function ref(name) {
-  return new Ref(name);
-}
-
-//console.log(ref('a')({a: 3}));
-//{ var x = ref('a'); console.log(x(x)); }
-//console.log((ref('a')) instanceof Ref);
-
-function to(f, t) {
-  var i, r = [];
-  for(i = f; i <= t; i++) {
-    r.push(i);
-  }
-  return r;
-}
-to.doc = "Give the numbers in the interval, inclusive";
-function sqr(r){ return r*r;}
-sqr.doc = "Square the number";
-function lt(x,y){ return x < y ? x : undefined; }
-lt.doc = "Keep if less than";
-function mult(a,b){ return a*b; }
-mult.doc = "Multiply it with ";
-function plus(a,b){ return a+b; }
-plus.doc = "Plus it with ";
- 
-window.funcs = [sqr, lt, mult, plus];
-
-class App extends Component {
-  render() {
-
-    // TODO: move init out!
-    if (!window.editors) window.editors = [];
-
-    var SQRLT = {
-      '_a': [1, to, 10],
-      // TODO: handle f as well as [f]?
-      '_b': [sqr],
-      '_c': [lt, 15]
-      };
-
-    var MULT = {
-      a: [1, to, 3],
-      _a: ["*"],
-      _aa: undefined,
-      b: [1, to, 3],
-      _b: ["="],
-      _bb: undefined,
-      c: [ref('a'), mult, ref('b')],
-    };
-
-    var prog = SQRLT; //MULT;
-
-    function Page(prog, res, editors) {
-      var fs = window.funcs.map(function(f){
-        return <span> {f.name} </span>;
-      });
-      var eds = editors.map(function(f){
-        function remove(){ window.editors = window.editors.filter((x) => (x != f)); window.changed(); }
-        var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
-        var s = <span>function <b style={{background: 'lightgreen'}} onClick={remove}>{name_rest[1]}</b>{name_rest[2]}</span>;
-        return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>{s}</pre>
-      });
-      return (
-        <div className="App">
-          <div className="App-header">
-            <h2>UI-First</h2>
-          </div>
-          <div>{fs}</div>
-          <br/><br/>
-          <div style={{float: 'right'}}>{eds}</div>
-          <center><table><tbody><tr><td><Program prog={prog} res={res}/></td></tr></tbody></table></center>
-        </div>
-      );
-    }
-    
-    var res = Run(prog);
-    return Page(prog, res, window.editors);
-  }
+  var fs = funcs.map(function(f){
+    return <span> {f.name} </span>;
+  });
+  var eds = editors.map(function(f){
+    function remove(){ window.editors = window.editors.filter((x) => (x != f)); window.changed(); }
+    var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
+    var s = <span>function <b style={{background: 'lightgreen'}} onClick={remove}>{name_rest[1]}</b>{name_rest[2]}</span>;
+    return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>{s}</pre>
+  });
+  return (
+    <div className="App">
+    <div className="App-header">
+    <h2>UI-First</h2>
+    </div>
+    <div>{fs}</div>
+    <br/><br/>
+    <div style={{float: 'right'}}>{eds}</div>
+    <center><table><tbody><tr><td><Program prog={prog} res={res}/></td></tr></tbody></table></center>
+    </div>
+  );
 }
 
 export default App;
