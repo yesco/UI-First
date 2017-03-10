@@ -10,12 +10,28 @@ function Program(props) {
   var res = props.res || [];
   if (!prog) return null;
 
+  // display columns
   if (prog instanceof Array) {
     const cols = prog.map((item, i) =>
       <td>
         <Program prog={item} res={res[i]}/>
       </td>
     );
+    function add() {
+      var s = prompt("Add Expression");
+      if (s === undefined) return;
+
+      var v;
+      var f = funcs[s];
+      var n = parseInt(s);
+      if (f) v = f
+      else if (!isNaN(n)) v = n;
+      else v = s;
+
+      prog.push(v);
+      window.changed();
+    }
+    cols.push(<td onClick={add} title="Add" style={{background: 'limegreen', width: '10px'}}>&nbsp;</td>);
     
     return (
       <center>
@@ -31,6 +47,7 @@ function Program(props) {
   if (prog instanceof Ref)
     ;// later
   else if (typeof(prog) === 'object') {
+    // display row
     const rows = Object.keys(prog).map((key) => {
       const label = <b style={{float: 'left', margin: '-5px', padding: '5px', fontSize: '10px', background: 'white', border: '1px solid black', borderRadius: '5px', padding: '3px'}}>{key}:</b>;
 
@@ -52,6 +69,7 @@ function Program(props) {
     );
   }
 
+  // display "simple" values (bottom)
   var color = 'lightgray', txt = prog;
   if (typeof prog === 'number') color = 'white';
   else if (typeof prog === 'string') color = 'white';

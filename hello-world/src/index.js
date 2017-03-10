@@ -5,8 +5,7 @@ import './index.css';
 import L from './UI-lang';
 import {ref} from './UI-lang';
 
-console.log("LLLL", L, L.to);
-
+// "globals"
 window.editors = [];
 
 var SQRLT = {
