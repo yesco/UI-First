@@ -1,66 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import {funcs, ref, Ref} from './UI-lang';
-
-function Apply(fun, args) {
-//  console.log("APPLY(", fun, args, ")");
-  // find any array pos loop over it's elements, recurse
-  var i = 0;
-  while (i < args.length && !(args[i] instanceof Array)) {
-    i++;
-  }
-  if (i < args.length) {
-    args = args.slice();
-    var arr = args[i];
-    return arr.map((x) => {
-      args[i] = x;
-      return Apply(fun, args);
-    }).filter((x) => x !== undefined);
-  } else {
-    return fun.apply(null, args);
-  }
-}
-
-//console.log(function(a){return a*a;}, [3]);
-
-function Run(prog, env, prev) {
-  console.log("RUN=>", prog, env, prev);
-  var r = Runn(prog, env, prev);
-  console.log("<=RUN", r, "of", prog);
-  return r;
-}
-
-function Runn(prog, env, prev) {
-  if (!prog) return;
-  if (prog instanceof Ref) return Run(prog.val(env), env);
-  if (prog instanceof Function) return prog;
-  if (prog instanceof Array) {
-    var r = prog.map(function(x){return Run(x, env);});
-    var x, f, a = [], first = true;
-    while (x = r.shift()) {
-      if (x instanceof Function) {
-        // 1 2 plus 3 foo => [plus(1 2 3)] foo
-        // TODO: handle "arrays"
-        if (f) a = [Apply(f, a)];
-        f = x;
-        if (prev && first) a.push(prev);
-        first = false;
-      } else a.push(x);
-    }
-    if (f) a = Apply(f, a);
-    if (a && a.length == 1) return a[0];
-    return a;
-  }
-  if (typeof(prog) === 'object') {
-    var prev, r = {};
-    for (let k in prog) {
-      prev = r[k] = Run(prog[k], r, prev);
-    }
-    return r;
-  }
-  if (typeof(prog) === 'number') return prog;
-  if (typeof(prog) === 'string') return prog;
-}
+import {funcs, Ref, Run} from './UI-lang';
 
 //console.log(Run([1, 2, function(a,b){return a+b;}]));
 //console.log(Run([1, 2, function(a,b){return a+b;}, function(a,b){return a*b;}, 5]));
@@ -152,6 +92,7 @@ function App(props) {
     var s = <span>function <b style={{background: 'lightgreen'}} onClick={remove}>{name_rest[1]}</b>{name_rest[2]}</span>;
     return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>{s}</pre>
   });
+
   return (
     <div className="App">
     <div className="App-header">
