@@ -29,6 +29,13 @@ function Program(props) {
       window.changed();
     }
   }
+
+  function add() {
+    var v = parseValue(prompt("Add Expression"));
+    if (v === null) return;
+    prog.push(v);
+    window.changed();
+  }
   // display columns
   if (prog instanceof Array) {
     const cols = prog.map((item, i) => {
@@ -58,13 +65,7 @@ function Program(props) {
       );
     });
 
-    function add() {
-      var v = parseValue(prompt("Add Expression"));
-      if (v === null) return;
-      prog.push(v);
-      window.changed();
-    }
-    cols.push(<td></td>);
+    //cols.push(<td></td>); // make sure there are always two+ columns, otherwise the add will be wide
     cols.push(<td onClick={add} title="Add" style={{background: 'limegreen', width: '10px'}}>&nbsp;</td>);
     
     return (
@@ -93,6 +94,14 @@ function Program(props) {
         </td></tr>
       );
     });
+
+    function addLine() {
+      prog = prog['_' + new Date().valueOf()] = [];
+      add();
+      window.changed();
+    }
+
+      rows.push(<tr><td style={{background: 'limegreen'}} onClick={addLine}>&nbsp;</td></tr>);
 //          <div style={{background: 'silver', 'text-align': 'center', padding: '10px', 'borderRadius': '10px'}}>
 //            {''+res[key]}
 //          </div>
@@ -141,12 +150,6 @@ function App(props) {
     return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>{s}</pre>
   });
 
-  function addLine() {
-    prog['_' + new Date().valueOf()] = [];
-    console.log(prog);
-    window.changed();
-  }
-
   return (
     <div className="App">
     <div className="App-header">
@@ -158,9 +161,6 @@ function App(props) {
     <div style={{float: 'right'}}>{eds}</div>
     <center><table><tbody><tr><td>
       <Program prog={prog} res={res}/>
-      <center><div style={{width: '100px', height: '10px', background: 'limegreen'}} onClick={addLine}>
-        &nbsp;
-      </div></center>
     </td></tr></tbody></table></center>
     </div>
   );
