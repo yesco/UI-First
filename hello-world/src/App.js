@@ -22,6 +22,13 @@ function Program(props) {
   var res = props.res || [];
   if (!prog) return null;
 
+  function showSource(e){
+    e.preventDefault();
+    if (!window.editors.some((x) => (x === prog))) {
+      window.editors.push(prog);
+      window.changed();
+    }
+  }
   // display columns
   if (prog instanceof Array) {
     const cols = prog.map((item, i) => {
@@ -32,6 +39,7 @@ function Program(props) {
       }
       function edit(e) {
         e.preventDefault();
+        if (e.target.tagName == 'HIDDEN') return;
         var v = prog[i];
         v = v instanceof Function ? v.name : v;
         v = parseValue(prompt("New value:", v));
@@ -41,9 +49,11 @@ function Program(props) {
       }
       // onLongPress only work on touch?
       // <td onContextMenu={del} delayLongPress={500} onLongPress={del}>
+      // <hidden style={{marginLeft: '20px', marginTop: '-50px', fontSize: '13px'}} onClick={showSource}>definition</hidden>
       return (
-        <td xonContextMenu={del} onClick={edit}>
+        <td className='ui' onClick={edit}>
           <Program prog={item} res={res[i]}/>
+          <hidden onClick={del}>x</hidden>
         </td>
       );
     });
@@ -101,13 +111,9 @@ function Program(props) {
     txt = <i>{prog.name}</i>
   } else if (typeof prog === 'function') {
     color = '#66FF99';
-    function showSource(){
-      if (!window.editors.some((x) => (x === prog))) {
-        window.editors.push(prog);
-        window.changed();
-      }
-    }
-    txt = <b onDrag={showSource} title={prog.doc}>{prog.name}</b>
+    txt = (
+      <b title={prog.doc} onContextMenu={showSource}>{prog.name}</b>
+    );
   } else {
     color = 'red';
     txt = '' + prog;
