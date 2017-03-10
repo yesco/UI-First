@@ -64,6 +64,7 @@ function Program(props) {
       prog.push(v);
       window.changed();
     }
+    cols.push(<td></td>);
     cols.push(<td onClick={add} title="Add" style={{background: 'limegreen', width: '10px'}}>&nbsp;</td>);
     
     return (
@@ -140,6 +141,12 @@ function App(props) {
     return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>{s}</pre>
   });
 
+  function addLine() {
+    prog['_' + new Date().valueOf()] = [];
+    console.log(prog);
+    window.changed();
+  }
+
   return (
     <div className="App">
     <div className="App-header">
@@ -149,7 +156,12 @@ function App(props) {
     <div>{fs}</div>
     <br/><br/>
     <div style={{float: 'right'}}>{eds}</div>
-    <center><table><tbody><tr><td><Program prog={prog} res={res}/></td></tr></tbody></table></center>
+    <center><table><tbody><tr><td>
+      <Program prog={prog} res={res}/>
+      <center><div style={{width: '100px', height: '10px', background: 'limegreen'}} onClick={addLine}>
+        &nbsp;
+      </div></center>
+    </td></tr></tbody></table></center>
     </div>
   );
 }
