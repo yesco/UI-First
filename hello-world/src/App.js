@@ -143,11 +143,15 @@ function App(props) {
   var fs = funcs.map(function(f){
     return <span> {f.name} </span>;
   });
+
   var eds = editors.map(function(f){
     function remove(){ window.editors = window.editors.filter((x) => (x != f)); window.changed(); }
     var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
     var s = <span>function <b style={{background: 'lightgreen'}} onClick={remove}>{name_rest[1]}</b>{name_rest[2]}</span>;
-    return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>{s}</pre>
+    return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>
+      <tt onClick={remove} style={{float: 'right', fontSize: '18px', marginTop: '-5px'}}>X</tt>
+      {s}
+    </pre>
   });
 
   return (
