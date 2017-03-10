@@ -144,6 +144,7 @@ function App(props) {
     <div className="App">
     <div className="App-header">
     <h2>UI-First</h2>
+    <b><small>(C) 2017 Jonas S Karlsson</small></b>
     </div>
     <div>{fs}</div>
     <br/><br/>
