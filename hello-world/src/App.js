@@ -95,8 +95,15 @@ function Program(props) {
     });
 
     function addLine() {
-      prog = prog['_' + new Date().valueOf()] = [];
+      var id = '_' + new Date().valueOf();
+      var oldprog = prog;
+      prog = prog[id] = [];
       add();
+      if (!prog || prog.length == 0) {
+        delete oldprog[id];
+        prog = oldprog;
+        return;
+      }
       window.changed();
     }
 
@@ -139,14 +146,7 @@ function App(props) {
   var res = Run(prog);
   var editors = props.editors;
 
-  //https://github.com/kolodny/immutability-helper
-  //( https://facebook.github.io/react/docs/update.html )
-  console.log("------------------", prog);
-  //  console.log(Print(prog));
-
-  var fs = funcs.map(function(f){
-    return <span key={f}> {f.name} </span>;
-  });
+  var fs = funcs.map((f) => <span key={f}> {f.name} </span>);
 
   var eds = editors.map(function(f){
     function remove(){ window.editors = window.editors.filter((x) => (x !== f)); window.changed(); }
@@ -160,16 +160,16 @@ function App(props) {
 
   return (
     <div className="App">
-    <div className="App-header">
-    <h2>UI-First</h2>
-    <b><small>(C) 2017 Jonas S Karlsson</small></b>
-    </div>
-    <div>{fs}</div>
-    <br/><br/>
-    <div style={{float: 'right'}}>{eds}</div>
-    <center><table><tbody><tr><td>
-      <Program prog={prog} res={res}/>
-    </td></tr></tbody></table></center>
+      <div className="App-header">
+        <h2>UI-First</h2>
+        <b><small>(C) 2017 Jonas S Karlsson</small></b>
+      </div>
+      <div>{fs}</div>
+      <br/><br/>
+      <div style={{float: 'right'}}>{eds}</div>
+      <center><table><tbody><tr><td>
+        <Program prog={prog} res={res}/>
+      </td></tr></tbody></table></center>
     </div>
   );
 }
