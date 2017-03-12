@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import './index.css';
 import L from './UI-lang';
-import {ref, Print} from './UI-lang';
+import {ref} from './UI-lang';
 
 // "globals"
 window.editors = [];
@@ -33,8 +33,7 @@ function changed() {
     document.getElementById('root')
   );
 
-  console.log('program:', window.program);
-  console.log(Print(window.program));
+  //console.log(Print(window.program));
 }
 
 window.changed = changed;
