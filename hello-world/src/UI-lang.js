@@ -63,11 +63,11 @@ export function Run(prog, env, prev) {
     return a;
   }
   if (typeof(prog) === 'object') {
-    var prev, r = {};
+    var p, rr = {};
     for (let k in prog) {
-      prev = r[k] = Run(prog[k], r, prev);
+      prev = rr[k] = Run(prog[k], r, p);
     }
-    return r;
+    return rr;
   }
   if (typeof(prog) === 'number') return prog;
   if (typeof(prog) === 'string') return prog;
@@ -101,5 +101,56 @@ funcs.forEach(function(x){
   funcs[x.name] = x;
 });
 
-export default funcs;
+export function Print(p) {
+  var r = '';
+  if (p === null || p === undefined || typeof(p) === 'number' || typeof(p) === 'string') return '' + p;
+  if (typeof(p) === 'function') return '#' + p.name;
+  if (p instanceof Ref) return '$' + p.name;
 
+  if (p instanceof Array) {
+    r = '[ ';
+    for(var i = 0; i < p.length; i++) {
+      r += ' ' + Print(p[i]);
+    }
+    r += ' ]';
+    return r;
+  }
+
+  if (p instanceof Object) {
+    r = '{\n';
+    for (var k in p) {
+      r += '  ' + k + ': ' + Print(p[k]) + '\n';
+    }
+    r += '}\n';
+    return r;
+  }
+
+  return '' + p;
+}
+
+export function Copy(p) {
+  if (p === null || p === undefined || typeof(p) === 'number' || typeof(p) === 'string') return p;
+  if (typeof(p) === 'function') return p;
+  if (p instanceof Ref) return p;
+
+  var r;
+  if (p instanceof Array) {
+    r = [];
+    for(var i = 0; i < p.length; i++) {
+      r.push(Copy(p[i]));
+    }
+    return r;
+  }
+
+  if (p instanceof Object) {
+    r = {};
+    for (var k in p) {
+      r[k] = Copy(p[k]);
+    }
+    return r;
+  }
+
+  return p;
+}
+
+export default funcs;

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import './index.css';
 import L from './UI-lang';
-import {ref} from './UI-lang';
+import {ref, Print} from './UI-lang';
 
 // "globals"
 window.editors = [];
@@ -25,17 +25,17 @@ var MULT = {
   c: [ref('a'), L.mult, ref('b')],
 };
 
-var program = SQRLT;
+window.program = SQRLT;
 
 function changed() {
   ReactDOM.render(
-    <App prog={program} editors={window.editors}/>,
+    <App prog={window.program} editors={window.editors}/>,
     document.getElementById('root')
   );
-  console.log('program:', program);
+
+  console.log('program:', window.program);
+  console.log(Print(window.program));
 }
 
 window.changed = changed;
 changed();
-
-

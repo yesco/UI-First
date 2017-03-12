@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './App.css';
 import {funcs, Ref, Run} from './UI-lang';
 
@@ -32,6 +32,7 @@ function Program(props) {
 
   function add() {
     var v = parseValue(prompt("Add Expression"));
+    console.log("ADD", v, prog);
     if (v === null) return;
     prog.push(v);
     window.changed();
@@ -46,7 +47,7 @@ function Program(props) {
       }
       function edit(e) {
         e.preventDefault();
-        if (e.target.tagName == 'HIDDEN') return;
+        if (e.target.tagName === 'HIDDEN') return;
         var v = prog[i];
         v = v instanceof Function ? v.name : v;
         v = parseValue(prompt("New value:", v));
@@ -66,14 +67,12 @@ function Program(props) {
     });
 
     //cols.push(<td></td>); // make sure there are always two+ columns, otherwise the add will be wide
-    cols.push(<td onClick={add} title="Add" style={{background: 'limegreen', width: '10px'}}>&nbsp;</td>);
+    cols.push(<td key='new' onClick={add} title="Add" style={{background: 'limegreen', width: '10px'}}>&nbsp;</td>);
     
     return (
       <center>
         <table style={{width: '100%'}}><tbody>
-           <tr style={{background: ''}}>
-             {cols}
-           </tr>
+           <tr style={{background: ''}}>{cols}</tr>
         </tbody></table>
       </center>
     );
@@ -83,12 +82,12 @@ function Program(props) {
     ;// later
   else if (typeof(prog) === 'object') {
     // display row
-    const rows = Object.keys(prog).map((key) => {
-      const label = <b key={key} style={{float: 'left', margin: '-5px', padding: '5px', fontSize: '10px', background: 'white', border: '1px solid black', borderRadius: '5px', padding: '3px'}}>{key}:</b>;
-
-      if (!res[key]) return;
+    const rows = Object.keys(prog).map((key, i) => {
+      const label = <b style={{float: 'left', margin: '-5px', fontSize: '10px', background: 'white', border: '1px solid black', borderRadius: '5px', padding: '3px'}}>{key}:</b>;
+      // TODO: this causes program not to render, at error, lol, lol
+      //if (!res[key]) return null;
       return (
-        <tr><td style={{background: 'lightgreen'}}>
+        <tr key={i}><td style={{background: 'lightgreen'}}>
           {key.match(/^_/) ? "" : label}
           <Program key={key} prog={prog[key]} res={res[key]}/>
         </td></tr>
@@ -101,7 +100,7 @@ function Program(props) {
       window.changed();
     }
 
-      rows.push(<tr><td style={{background: 'limegreen'}} onClick={addLine}>&nbsp;</td></tr>);
+    rows.push(<tr key='new'><td style={{background: 'limegreen'}} onClick={addLine}>&nbsp;</td></tr>);
 //          <div style={{background: 'silver', 'text-align': 'center', padding: '10px', 'borderRadius': '10px'}}>
 //            {''+res[key]}
 //          </div>
@@ -140,12 +139,17 @@ function App(props) {
   var res = Run(prog);
   var editors = props.editors;
 
+  //https://github.com/kolodny/immutability-helper
+  //( https://facebook.github.io/react/docs/update.html )
+  console.log("------------------", prog);
+  //  console.log(Print(prog));
+
   var fs = funcs.map(function(f){
-    return <span> {f.name} </span>;
+    return <span key={f}> {f.name} </span>;
   });
 
   var eds = editors.map(function(f){
-    function remove(){ window.editors = window.editors.filter((x) => (x != f)); window.changed(); }
+    function remove(){ window.editors = window.editors.filter((x) => (x !== f)); window.changed(); }
     var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
     var s = <span>function <b style={{background: 'lightgreen'}} onClick={remove}>{name_rest[1]}</b>{name_rest[2]}</span>;
     return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>
