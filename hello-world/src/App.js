@@ -69,11 +69,23 @@ function Program(props) {
     //cols.push(<td></td>); // make sure there are always two+ columns, otherwise the add will be wide
     cols.push(<td key='new' onClick={add} title="Add" style={{background: 'limegreen', width: '10px'}}>&nbsp;</td>);
     
-    return (
+    if (0) return (
       <center>
         <table style={{width: '100%'}}><tbody>
            <tr style={{background: ''}}>{cols}</tr>
            <tr style={{align: 'center', background: 'white'}}><td>{props.res ? '=> '+ props.res : '' }</td></tr>
+        </tbody></table>
+      </center>
+    );
+    return (
+      <center>
+        <table style={{width: '100%'}}><tbody>
+           <tr style={{background: ''}}>
+             {cols}
+             <td style={{paddingLeft: '10px', width: '150px', maxWidth: '150px', align: 'center', background: 'white', overflow: 'auto', wordBreak: 'break-all'}}>
+               {props.res ? '=> '+ props.res : '' }
+             </td>
+           </tr>
         </tbody></table>
       </center>
     );
