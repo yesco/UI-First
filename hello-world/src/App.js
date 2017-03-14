@@ -73,6 +73,7 @@ function Program(props) {
       <center>
         <table style={{width: '100%'}}><tbody>
            <tr style={{background: ''}}>{cols}</tr>
+           <tr style={{align: 'center', background: 'white'}}>{''+props.res}</tr>
         </tbody></table>
       </center>
     );
@@ -99,7 +100,7 @@ function Program(props) {
       var oldprog = prog;
       prog = prog[id] = [];
       add();
-      if (!prog || prog.length == 0) {
+      if (!prog || prog.length === 0) {
         delete oldprog[id];
         prog = oldprog;
         return;
@@ -118,11 +119,21 @@ function Program(props) {
     );
   }
 
+  function input(e) {
+    e.preventDefault();
+    var v = 'function ' + prog + '(){\n  \n}\n';
+    window.editors.push(v);
+    window.changed();
+  }
+
+  prog = parseValue(prog);
   // display "simple" values (bottom)
   var color = 'lightgray', txt = prog;
   if (typeof prog === 'number') color = 'white';
-  else if (typeof prog === 'string') color = 'white';
-  else if (prog instanceof Ref) {
+  else if (typeof prog === 'string') {
+    color = 'white';
+    txt = <span title='create function - rightclick' onContextMenu={input}>{prog}</span>
+  } else if (prog instanceof Ref) {
     color = 'cyan';
     txt = <i>{prog.name}</i>
   } else if (typeof prog === 'function') {
@@ -149,13 +160,24 @@ function App(props) {
   var fs = funcs.map((f) => <span key={f}> {f.name} </span>);
 
   var eds = editors.map(function(f){
-    function remove(){ window.editors = window.editors.filter((x) => (x !== f)); window.changed(); }
+    function remove(e){
+      var code = e.target.nextSibling.innerText;
+      var r = eval('(' + code + ')');
+      // TODO: change...
+      funcs[r.name] = window[r.name] = r;
+
+      window.editors = window.editors.filter((x) => (x !== f));
+
+      window.changed();
+    }
+
     var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
-    var s = <span>function <b style={{background: 'lightgreen'}} onClick={remove}>{name_rest[1]}</b>{name_rest[2]}</span>;
+    var s = <span contentEditable='true'>function <b style={{background: 'lightgreen'}} onClick={remove}>{name_rest[1]}</b>{name_rest[2]}</span>;
     return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>
-      <tt onClick={remove} style={{float: 'right', fontSize: '18px', marginTop: '-5px'}}>X</tt>
+      <tt onClick={remove} style={{float: 'right', fontSize: '18px', paddingLeft: '10px', marginTop: '-5px'}}>X</tt>
       {s}
     </pre>
+//      <tt onClick={remove} style={{float: 'right', fontSize: '18px', marginRight: '-10px', marginTop: '10px'}}>save</tt>
   });
 
   return (
