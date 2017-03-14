@@ -73,7 +73,7 @@ function Program(props) {
       <center>
         <table style={{width: '100%'}}><tbody>
            <tr style={{background: ''}}>{cols}</tr>
-           <tr style={{align: 'center', background: 'white'}}>{''+props.res}</tr>
+           <tr style={{align: 'center', background: 'white'}}><td>{props.res ? '=> '+ props.res : '' }</td></tr>
         </tbody></table>
       </center>
     );
@@ -121,12 +121,11 @@ function Program(props) {
 
   function input(e) {
     e.preventDefault();
-    var v = 'function ' + prog + '(){\n  \n}\n';
+    var v = 'function ' + prog + '(a){\n  \n}\n';
     window.editors.push(v);
     window.changed();
   }
 
-  prog = parseValue(prog);
   // display "simple" values (bottom)
   var color = 'lightgray', txt = prog;
   if (typeof prog === 'number') color = 'white';
@@ -163,12 +162,12 @@ function App(props) {
     function remove(e){
       var code = e.target.nextSibling.innerText;
       var r = eval('(' + code + ')');
-      // TODO: change...
-      funcs[r.name] = window[r.name] = r;
+      var name = r.name
+      // TODO: change, use func only?
+      funcs[name] = window[name] = r;
 
       window.editors = window.editors.filter((x) => (x !== f));
-
-      window.changed();
+      window.changed(function(x){return (x === name)?parseValue(x):x; });
     }
 
     var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);

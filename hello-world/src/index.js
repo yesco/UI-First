@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import './index.css';
 import L from './UI-lang';
-import {ref} from './UI-lang';
+import {ref, Map} from './UI-lang';
 
 // "globals"
 window.editors = [];
@@ -27,7 +27,14 @@ var MULT = {
 
 window.program = SQRLT;
 
-function changed() {
+// f gets Map:ed over program before rerender
+function changed(f) {
+  if (f) {
+    console.log('before', window.program);
+    window.program = Map(window.program, f);
+    console.log('after', window.program);
+  }
+
   ReactDOM.render(
     <App prog={window.program} editors={window.editors}/>,
     document.getElementById('root')

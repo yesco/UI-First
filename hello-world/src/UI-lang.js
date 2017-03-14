@@ -14,7 +14,7 @@ export function ref(name) {
 //console.log((ref('a')) instanceof Ref);
 
 export function Apply(fun, args) {
-//  console.log("APPLY(", fun, args, ")");
+  //console.log("APPLY(", fun, args, ")");
   // find any array pos loop over it's elements, recurse
   var i = 0;
   while (i < args.length && !(args[i] instanceof Array)) {
@@ -35,7 +35,7 @@ export function Apply(fun, args) {
 //console.log(function(a){return a*a;}, [3]);
 
 export function Runn(prog, env, prev) {
-  console.log("RUN=>", prog, env, prev);
+  console.log("RUN=>", prog, 'env=', env, 'prev=', prev);
   var r = Runn(prog, env, prev);
   console.log("<=RUN", r, "of", prog);
   return r;
@@ -65,7 +65,7 @@ export function Run(prog, env, prev) {
   if (typeof(prog) === 'object') {
     var p, rr = {};
     for (let k in prog) {
-      prev = rr[k] = Run(prog[k], r, p);
+      prev = rr[k] = Run(prog[k], r, prev);
     }
     return rr;
   }
@@ -128,16 +128,16 @@ export function Print(p) {
   return '' + p;
 }
 
-export function Copy(p) {
-  if (p === null || p === undefined || typeof(p) === 'number' || typeof(p) === 'string') return p;
-  if (typeof(p) === 'function') return p;
-  if (p instanceof Ref) return p;
+export function Map(p, f) {
+  if (p === null || p === undefined || typeof(p) === 'number' || typeof(p) === 'string') return f(p);
+  if (typeof(p) === 'function') return f(p);
+  if (p instanceof Ref) return f(p);
 
   var r;
   if (p instanceof Array) {
     r = [];
     for(var i = 0; i < p.length; i++) {
-      r.push(Copy(p[i]));
+      r.push(Map(p[i], f));
     }
     return r;
   }
@@ -145,12 +145,16 @@ export function Copy(p) {
   if (p instanceof Object) {
     r = {};
     for (var k in p) {
-      r[k] = Copy(p[k]);
+      r[k] = Map(p[k], f);
     }
     return r;
   }
 
   return p;
+}
+
+export function Copy(p) {
+  return Map(p, (x) => x);
 }
 
 export default funcs;
