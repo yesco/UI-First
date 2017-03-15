@@ -1,12 +1,28 @@
 ////////////////////////////////////////////////////////////////////////////////
 // langauge elements
 export function Ref(name) {
-  this.val = function(env) { return env ? env[name] : undefined; }
+  this.val = function(env) {
+    if (!env) return;
+    if (env[name]) return env[name];
+    for (let i in env) {
+      var r = env[i];
+      if (r) return r;
+    }
+  }
   this.name = name;
 }
 
 export function ref(name) {
   return new Ref(name);
+}
+
+export function Vertical(list) {
+  //this.list = Array.prototype.slice.call(list);
+  this.list = list;
+}
+
+export function vertical() {
+  return new Vertical(arguments);
 }
 
 //console.log(ref('a')({a: 3}));
@@ -42,9 +58,12 @@ export function Runn(prog, env, prev) {
 }
 
 export function Run(prog, env, prev) {
+  if (!env) env = {}; // start an env
   if (!prog) return;
-  if (prog instanceof Ref) return Run(prog.val(env), env);
+  //  if (prog instanceof Ref) return Run(prog.val(env), env);
+  if (prog instanceof Ref) return prog.val(env);
   if (prog instanceof Function) return prog;
+  if (prog instanceof Vertical) prog = prog.list;
   if (prog instanceof Array) {
     var r = prog.map(function(x){return Run(x, env);});
     var x, f, a = [], first = true;
@@ -54,18 +73,22 @@ export function Run(prog, env, prev) {
         // TODO: handle "arrays"
         if (f) a = [Apply(f, a)];
         f = x;
-        if (prev && first) a.push(prev);
-        first = false;
-      } else a.push(x);
+        if (prev && first && f) a.push(prev);
+      } else {
+        a.push(x);
+      }
+      first = false;
     }
     if (f) a = Apply(f, a);
     if (a && a.length === 1) return a[0];
     return a;
   }
+  // named items, not implicitly refer to previous value (above)
   if (typeof(prog) === 'object') {
     var p, rr = {};
     for (let k in prog) {
-      prev = rr[k] = Run(prog[k], r, prev);
+//      prev = rr[k] = env[k] = Run(prog[k], env, undefined);
+      prev = rr[k] = env[k] = Run(prog[k], env, prev);
     }
     return rr;
   }
@@ -134,6 +157,7 @@ export function Map(p, f) {
   if (p instanceof Ref) return f(p);
 
   var r;
+  if (p instanceof Vertical) return new Vertical(Map(p.list, f));
   if (p instanceof Array) {
     r = [];
     for(var i = 0; i < p.length; i++) {

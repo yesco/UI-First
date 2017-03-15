@@ -3,36 +3,52 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import './index.css';
 import L from './UI-lang';
-import {ref, Map} from './UI-lang';
+import {ref, Map, vertical} from './UI-lang';
 
 // "globals"
 window.editors = [];
 
-var SQRLT = {
-  '_a': [1, L.to, 10],
-  // TODO: handle f as well as [f]?
-  '_b': [L.sqr],
-  '_c': [L.lt, 15]
-};
+var SQRLT = vertical(
+  [1, L.to, 10],
+  [L.sqr],
+  [L.lt, 15],
+);
 
-var MULT = {
-  a: [1, L.to, 3],
-  _a: ["*"],
-  _aa: undefined,
-  b: [1, L.to, 3],
-  _b: ["="],
-  _bb: undefined,
-  c: [ref('a'), L.mult, ref('b')],
-};
+var MULT = vertical(
+  [{a: [1, L.to, 3]}, undefined],
+  [{b: [1, L.to, 3]}, undefined],
+  [ ref('a'), L.mult, ref('b') ],
+);
 
-window.program = SQRLT;
+var FOO = vertical(
+    {
+      a: [77, L.plus, 3],
+      b: [1,2,3,4],
+      c: [ref('^'), L.plus, 10]
+    },
+  vertical(
+    [{aa: [77, L.plus, 3]}],
+    [{bb: [1,2,3,4]}],
+    [{cc: [ref('^'), L.plus, 10]}]
+  )
+)
+
+var BAR = vertical(
+  [1],
+  undefined,
+  [2, L.plus, 3],
+  undefined,
+  [L.plus, 7],
+);
+
+//window.program = SQRLT2;
+//window.program = MULT;
+window.program = BAR;
 
 // f gets Map:ed over program before rerender
 function changed(f) {
   if (f) {
-    console.log('before', window.program);
     window.program = Map(window.program, f);
-    console.log('after', window.program);
   }
 
   ReactDOM.render(

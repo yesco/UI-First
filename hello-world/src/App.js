@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {funcs, Ref, Run} from './UI-lang';
+import {funcs, Ref, Run, Vertical} from './UI-lang';
 
 //console.log(Run([1, 2, function(a,b){return a+b;}]));
 //console.log(Run([1, 2, function(a,b){return a+b;}, function(a,b){return a*b;}, 5]));
@@ -20,7 +20,7 @@ function parseValue(s) {
 function Program(props) {
   var prog = props.prog;
   var res = props.res || [];
-  if (prog === null) return null;
+  if (prog === null || prog === undefined) return <div style={{height: '10px', background: 'white'}}></div>;
 
   function showSource(e){
     e.preventDefault();
@@ -37,7 +37,10 @@ function Program(props) {
     prog.push(v);
     window.changed();
   }
+  //if (prog instanceof Vertical) return <Program prog={prog.list} res={res}/>;
   // display columns
+  if (prog instanceof Vertical) prog = prog.list;
+
   if (prog instanceof Array) {
     const cols = prog.map((item, i) => {
       function del(e) {
@@ -105,8 +108,8 @@ function Program(props) {
       // TODO: this causes program not to render, at error, lol, lol
       //if (!res[key]) return null;
       return (
-        <tr key={i}><td style={{background: 'lightgreen'}}>
-          {key.match(/^_/) ? "" : label}
+          <tr key={i}><td>
+          {key.match(/^[_0-9]/) ? "" : label}
           <Program key={key} prog={prog[key]} res={res[key]}/>
         </td></tr>
       );
@@ -130,7 +133,8 @@ function Program(props) {
 //            {''+res[key]}
 //          </div>
     return (
-      <table>
+//      <table>
+      <table style={{background: 'lightgreen', padding: '0px', border: '0px', margin: '0px'}}>
         <tbody>{rows}</tbody>
       </table>
     );
@@ -170,7 +174,11 @@ function Program(props) {
 
 function App(props) {
   var prog = props.prog;
-  var res = Run(prog);
+  try {
+    var res = Run(prog);
+  } catch (e) {
+    alert(e);
+  }
   var editors = props.editors;
 
   var fs = funcs.map((f) => <span key={f}> {f.name} </span>);
@@ -178,13 +186,16 @@ function App(props) {
   var eds = editors.map(function(f){
     function remove(e){
       var code = e.target.nextSibling.innerText;
-      var r = eval('(' + code + ')');
-      var name = r.name
-      // TODO: change, use func only?
-      funcs[name] = window[name] = r;
-
-      window.editors = window.editors.filter((x) => (x !== f));
-      window.changed(function(x){return (x === name)?parseValue(x):x; });
+//      try {
+        var r = eval('(' + code + ')');
+        var name = r.name
+        // TODO: change, use func only?
+        funcs[name] = window[name] = r;
+        window.editors = window.editors.filter((x) => (x !== f));
+        window.changed(function(x){return (x === name)?parseValue(x):x; });
+//      } catch (e) {
+//        alert(e);
+//      }
     }
 
     var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
@@ -192,6 +203,7 @@ function App(props) {
     return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>
       <tt onClick={remove} style={{float: 'right', fontSize: '18px', paddingLeft: '10px', marginTop: '-5px'}}>X</tt>
       {s}
+      <span style={{background: 'pink'}}></span>
     </pre>
 //      <tt onClick={remove} style={{float: 'right', fontSize: '18px', marginRight: '-10px', marginTop: '10px'}}>save</tt>
   });

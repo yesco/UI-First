@@ -1,3 +1,36 @@
+.add {
+  background: limegreen;
+  height: 10px;
+  width: 10px;
+//  minHeight: 10px;
+//  minWidth: 5px;
+//  maxHeight: 10px;
+//  maxWidth: 5px;
+  valign: center;
+  align: center;
+  text-align: center;
+}
+
+.Prog td {
+  valign: center;
+  align: center;
+  text-align: center;
+  background: white;
+  padding: 10px;
+  border: 0px;
+  background: white;
+}
+
+.Prog tr {
+  background: yellow;
+}
+
+.Prog table tr td {
+  background: limegreen;
+  margin: 0px;
+  padding: 0px;
+}
+
 .App {
   text-align: center;
 }
