@@ -34,10 +34,10 @@ var FOO = vertical(
 )
 
 var BAR = vertical(
-  [1],
+  [1, L.to, 1000],
   undefined,
   [2, L.plus, 3],
-  undefined,
+//  undefined,
   [L.plus, 7],
 );
 

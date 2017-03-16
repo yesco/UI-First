@@ -74,23 +74,55 @@ function Program(props) {
     
     // Show result under
     if (0) {
+      // show result below
       return (
         <center>
           <table style={{width: '100%'}}><tbody>
              <tr style={{background: ''}}>{cols}</tr>
-             <tr style={{align: 'center', background: 'white'}}><td>{props.res ? '=> '+ props.res : '' }</td></tr>
+             <tr style={{align: 'center', background: 'white'}}><td>
+               {props.res !== undefined? '=> '+ props.res : '' }
+             </td></tr>
           </tbody></table>
         </center>
       )
     } else {
       // Show result on side
+      // click to maximize and minimize
+      function max(e) {
+        var d = e.target, p = d.parentNode;
+        p.style.overflow = 'visible';
+
+        d.style.width = '400px';
+        d.style.width = '98%';
+        d.style.maxHeight = '3000px';
+        d.style.background = 'yellow';
+        d.style.border = 'solid 1px black';
+        d.style.left = '0px';
+        d.style.position = 'absolute';
+      }
+      function min(e) {
+        var d = e.target, p = d.parentNode;
+        p.style.overflow = 'hidden';
+
+        d.style.background = 'white';
+        d.style.width = '';
+        d.style.maxHeight = '100px';
+        d.style.border = '';
+        d.style.position = '';
+      }
+      function toggle(e) {
+        if (e.target.style.position === 'absolute')
+          min(e);
+        else 
+          max(e);
+      }
       return (
         <center>
           <table style={{width: '100%'}}><tbody>
             <tr style={{background: ''}}>
               {cols}
               <td style={{paddingLeft: '10px', width: '150px', maxWidth: '150px', align: 'center', background: 'white', overflow: 'auto', wordBreak: 'break-all'}}>
-                {props.res ? '=> '+ props.res : '' }
+              <div style={{maxHeight: '100px'}} onClick={toggle}>{props.res ? '=> '+ props.res : '' }</div>
               </td>
             </tr>
           </tbody></table>
