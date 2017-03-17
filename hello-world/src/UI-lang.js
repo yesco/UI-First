@@ -124,6 +124,11 @@ funcs.forEach(function(x){
   funcs[x.name] = x;
 });
 
+export function register(f, name) {
+  funcs[name] = f;
+  funcs.push(f);
+}
+
 export function Print(p) {
   var r = '';
   if (p === null || p === undefined || typeof(p) === 'number' || typeof(p) === 'string') return '' + p;

@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {funcs, Ref, Run, Vertical} from './UI-lang';
+import {register, funcs, Ref, Run, Vertical} from './UI-lang';
 
 //console.log(Run([1, 2, function(a,b){return a+b;}]));
 //console.log(Run([1, 2, function(a,b){return a+b;}, function(a,b){return a*b;}, 5]));
@@ -17,18 +17,18 @@ function parseValue(s) {
   return s;
 }
 
+function showSource(e, f){
+  e.preventDefault();
+  if (!window.editors.some((x) => (x === f))) {
+    window.editors.push(f);
+    window.changed();
+  }
+}
+
 function Program(props) {
   var prog = props.prog;
   var res = props.res || [];
   if (prog === null || prog === undefined) return <div style={{height: '10px', background: 'white'}}></div>;
-
-  function showSource(e){
-    e.preventDefault();
-    if (!window.editors.some((x) => (x === prog))) {
-      window.editors.push(prog);
-      window.changed();
-    }
-  }
 
   function add() {
     var v = parseValue(prompt("Add Expression"));
@@ -191,7 +191,7 @@ function Program(props) {
   } else if (typeof prog === 'function') {
     color = '#66FF99';
     txt = (
-      <b title={prog.doc} onContextMenu={showSource}>{prog.name}</b>
+      <b title={prog.doc} onContextMenu={(e) => showSource(e, prog)}>{prog.name}</b>
     );
   } else {
     color = 'red';
@@ -213,21 +213,22 @@ function App(props) {
   }
   var editors = props.editors;
 
-  var fs = funcs.map((f) => <span key={f}> {f.name} </span>);
+  var fs = funcs.map((f) => <span key={f} onClick={(e) => showSource(e, f)}> {f.name} </span>);
 
   var eds = editors.map(function(f){
     function remove(e){
       var code = e.target.nextSibling.innerText;
-//      try {
+      try {
         var r = eval('(' + code + ')');
         var name = r.name
-        // TODO: change, use func only?
-        funcs[name] = window[name] = r;
+        register(r, name);
+
+        // Remove from list and display
         window.editors = window.editors.filter((x) => (x !== f));
         window.changed(function(x){return (x === name)?parseValue(x):x; });
-//      } catch (e) {
-//        alert(e);
-//      }
+      } catch (e) {
+        alert(e);
+      }
     }
 
     var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
