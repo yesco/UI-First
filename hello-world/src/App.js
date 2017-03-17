@@ -19,6 +19,7 @@ function parseValue(s) {
 
 function showSource(e, f){
   e.preventDefault();
+  // don't add if already there
   if (!window.editors.some((x) => (x === f))) {
     window.editors.push(f);
     window.changed();

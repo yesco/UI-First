@@ -119,14 +119,32 @@ mult.doc = "Multiply it with ";
 export function plus(a,b){ return a+b; }
 plus.doc = "Plus it with ";
  
+
 export var funcs = [to, sqr, lt, mult, plus];
 funcs.forEach(function(x){
   funcs[x.name] = x;
+});
+// Read back user defined functions from storage
+Object.keys(localStorage).forEach(function(k){
+  var f = localStorage[k];
+  var name = k.match(/func\/(.*)/);
+  if (!name) return;
+  name = name[1];
+
+  try {
+    f = eval('(' + f + ')');
+  } catch (e) {
+    alert(e);
+  }
+  funcs[name] = f;
+  funcs.push(f);
 });
 
 export function register(f, name) {
   funcs[name] = f;
   funcs.push(f);
+  // store user defined functions
+  localStorage['func/' + name] = f.toString();
 }
 
 export function Print(p) {
