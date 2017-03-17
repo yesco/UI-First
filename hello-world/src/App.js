@@ -1,6 +1,34 @@
 import React from 'react';
 import './App.css';
+
 import {register, funcs, Ref, Run, Vertical} from './UI-lang';
+
+function Press(props) {
+  var timer;
+  function down(e) {
+    e.preventDefault();
+    timer = setTimeout(()=>{
+      clearTimeout(timer);
+      timer = undefined;
+      console.log("PRESS");
+      if (props.onLongPress) props.onLongPress(e);
+    }, 250);
+  }
+  function up(e) {
+    e.preventDefault();
+    if (timer) {
+      clearTimeout(timer);
+      console.log("CLICK");
+      if (props.onTap) props.onTap(e);
+    }
+    timer = undefined;
+  }
+  return (
+    <span onMouseDown={down} onTouchStart={down} onMouseUp={up} onTouchEnd={up}>
+      {props.children}
+    </span>
+  );
+}
 
 //console.log(Run([1, 2, function(a,b){return a+b;}]));
 //console.log(Run([1, 2, function(a,b){return a+b;}, function(a,b){return a*b;}, 5]));
@@ -63,10 +91,10 @@ function Program(props) {
       // <td onContextMenu={del} delayLongPress={500} onLongPress={del}>
       // <hidden style={{marginLeft: '20px', marginTop: '-50px', fontSize: '13px'}} onClick={showSource}>definition</hidden>
       return (
-        <td key={i} className='ui' onClick={edit}>
+        <td key={i} className='ui'><Press onTap={edit}>
           <Program prog={item} res={res[i]}/>
           <hidden onClick={del}>x</hidden>
-        </td>
+        </Press></td>
       );
     });
 
@@ -185,14 +213,17 @@ function Program(props) {
   if (typeof prog === 'number') color = 'white';
   else if (typeof prog === 'string') {
     color = 'white';
-    txt = <span title='create function - rightclick' onContextMenu={input}>{prog}</span>
+    // TODO: title='create function - rightclick' 
+    txt = <Press onLongPress={input}>{prog}</Press>
   } else if (prog instanceof Ref) {
     color = 'cyan';
     txt = <i>{prog.name}</i>
   } else if (typeof prog === 'function') {
     color = '#66FF99';
     txt = (
-      <b title={prog.doc} onContextMenu={(e) => showSource(e, prog)}>{prog.name}</b>
+      <Press onLongPress={(e) => showSource(e, prog)}>
+        <b title={prog.doc}>{prog.name}</b>
+      </Press>
     );
   } else {
     color = 'red';
@@ -226,7 +257,7 @@ function App(props) {
 
         // Remove from list and display
         window.editors = window.editors.filter((x) => (x !== f));
-        window.changed(function(x){return (x === name)?parseValue(x):x; });
+        window.changed(function(x){return (x === name || x.name === name)? r : x; });
       } catch (e) {
         alert(e);
       }
@@ -254,6 +285,11 @@ function App(props) {
       <center><table><tbody><tr><td>
         <Program prog={prog} res={res}/>
       </td></tr></tbody></table></center>
+
+      <Press onTap={(e)=>console.log("tap")} onLongPress={(e)=>console.log("press")}>
+        <div>foobar fie fum</div>
+      </Press>
+
     </div>
   );
 }

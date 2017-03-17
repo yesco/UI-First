@@ -44,7 +44,7 @@ var BAR = vertical(
 //window.program = SQRLT2;
 //window.program = MULT;
 //window.program = BAR;
-window.program = vertical();
+window.program = vertical([]);
 
 // f gets Map:ed over program before rerender
 function changed(f) {

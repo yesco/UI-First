@@ -141,8 +141,17 @@ Object.keys(localStorage).forEach(function(k){
 });
 
 export function register(f, name) {
+  // need replace if there
+  if (!funcs[name]) {
+    funcs.push(f);
+  } else {
+    funcs.forEach(function(x, i){
+      if (x.name == name)
+        funcs[i] = f;
+    });
+  }
+
   funcs[name] = f;
-  funcs.push(f);
   // store user defined functions
   localStorage['func/' + name] = f.toString();
 }
