@@ -61,7 +61,6 @@ function Program(props) {
 
   function add() {
     var v = parseValue(prompt("Add Expression"));
-    console.log("ADD", v, prog);
     if (v === null) return;
     prog.push(v);
     window.changed();
@@ -145,13 +144,14 @@ function Program(props) {
         else 
           max(e);
       }
+      var hasRes = props.res && (props.res instanceof Array && props.res.length > 0);
       return (
         <center>
           <table style={{width: '100%'}}><tbody>
             <tr style={{background: ''}}>
               {cols}
-              <td style={{paddingLeft: '10px', width: '150px', maxWidth: '150px', align: 'center', background: 'white', overflow: 'auto', wordBreak: 'break-all'}}>
-              <div style={{maxHeight: '100px'}} onClick={toggle}>{props.res ? '=> '+ props.res : '' }</div>
+              <td style={{paddingLeft: '10px', width: '150px', maxWidth: '150px', align: 'center', background: props.res?'white':'', overflow: 'auto', wordBreak: 'break-all'}}>
+                <div style={{maxHeight: '100px'}} onClick={toggle}>{props.res ? '=> '+ props.res : '' }</div>
               </td>
             </tr>
           </tbody></table>
