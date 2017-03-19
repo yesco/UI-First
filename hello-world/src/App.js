@@ -273,6 +273,9 @@ function App(props) {
 //      <tt onClick={remove} style={{float: 'right', fontSize: '18px', marginRight: '-10px', marginTop: '10px'}}>save</tt>
   });
 
+  var sortk = Object.keys(res).sort();
+  var last = res[sortk[sortk.length-1]];
+
   return (
     <div className="App">
       <div className="App-header">
@@ -285,10 +288,7 @@ function App(props) {
       <center><table><tbody><tr><td>
         <Program prog={prog} res={res}/>
       </td></tr></tbody></table></center>
-
-      <Press onTap={(e)=>console.log("tap")} onLongPress={(e)=>console.log("press")}>
-        <div>foobar fie fum</div>
-      </Press>
+      <div style={{background: 'white'}}>{last}</div>
 
     </div>
   );
