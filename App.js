@@ -5,20 +5,29 @@ function Press(body) {
     timer = setTimeout(()=>{
       clearTimeout(timer);
       timer = undefined;
-      console.log("PRESS");
-      if (this.onLongPress) this.onLongPress(e);
+      console.log("PRESS", e);
+      if (this.onlongpress) this.onlongpress(e);
     }, 250);
   }
   function up(e) {
     e.preventDefault();
+    if (e.button === 2) return; // oncontextmenu
     if (timer) {
       clearTimeout(timer);
-      console.log("CLICK");
-      if (this.onTap) this.onTap(e);
+      console.log("CLICK", e);
+      if (this.ontap) this.ontap(e);
     }
     timer = undefined;
   }
-  return span(body).a('onMouseDown', down).a('onTouchStart', down).a('onMouseUp', up).a('onTouchEnd', up);
+  var that = this;
+  return span(body)
+    .a('onmousedown', down).a('ontouchstart', down)
+    .a('onmouseup', up).a('ontouchend', up)
+    .a('oncontextmenu', function(e){
+      e.preventDefault();
+      console.log("CONTEXT", e);
+      that.onlongpress && that.onlongpress(e);
+    });
 }
 
 //console.log(Run([1, 2, function(a,b){return a+b;}]));
@@ -80,11 +89,11 @@ function Program(prog, res) {
       // onLongPress only work on touch?
       // <td onContextMenu={del} delayLongPress={500} onLongPress={del}>
       // <hidden style={{marginLeft: '20px', marginTop: '-50px', fontSize: '13px'}} onClick={showSource}>definition</hidden>
-      return td(Press(Program(item, res), h('hidden', 'x').a('onClick', del)).a('onTap', edit)).c('ui');
+      return td(Press(Program(item, res), h('hidden', 'x').a('onclick', del)).a('ontap', edit)).c('ui');
     });
 
     //cols.push(<td></td>); // make sure there are always two+ columns, otherwise the add will be wide
-    cols.push(td(unsafehtml('&nbsp;')).a('onClick', add).a('title', "Add").s('background', 'limegreen').s('width', '15px'));
+    cols.push(td(unsafehtml('&nbsp;')).a('onclick', add).a('title', "Add").s('background', 'limegreen').s('width', '15px'));
     
     // Show result under
     if (0) {
@@ -166,7 +175,7 @@ function Program(prog, res) {
       window.changed();
     }
 
-    rows.push(tr(td(unsafehtml('&nbsp;')).s('background', 'limegreen').a('onClick', addLine)));
+    rows.push(tr(td(unsafehtml('&nbsp;')).s('background', 'limegreen').a('onclick', addLine)));
 //          <div style={{background: 'silver', 'text-align': 'center', padding: '10px', 'borderRadius': '10px'}}>
 //            {''+res[key]}
 //          </div>
@@ -186,14 +195,14 @@ function Program(prog, res) {
   else if (typeof prog === 'string') {
     color = 'white';
     // TODO: title='create function - rightclick' 
-    txt = Press(prog).a('onLongPress', input);
+    txt = Press(prog).a('onlongpress', input);
   } else if (prog instanceof Ref) {
     color = 'cyan';
     txt = i(prog.name);
   } else if (typeof prog === 'function') {
     color = '#66FF99';
     txt = Press(b(prog.name).a('title', prog.doc))
-      .a('onLongPress', function(e){ showSource(e, prog); });
+      .a('onlongpress', function(e){ showSource(e, prog); });
   } else {
     color = 'red';
     txt = '' + prog;
@@ -210,7 +219,7 @@ function App(prog, editors) {
     alert(e);
   }
 
-  var fs = funcs.map(function(f){return span(f.name, ' ').a('onClick', function(e){ showSource(e, f) })});
+  var fs = funcs.map(function(f){return span(f.name, ' ').a('onclick', function(e){ showSource(e, f) })});
 
   var eds = editors.map(function(f){
     function remove(e){
@@ -229,14 +238,15 @@ function App(prog, editors) {
     }
 
     var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
-    var body = span(b(name_rest[1], name_rest[2])
-      .s('background', 'lightgreen'))
-      .a('contentEditable', true).a('onClick', remove);
-    return pre(tt('X')
-               .a('onClick', remove)
-               .s('float', 'right').s('fontSize', '18px').s('paddingLeft', '10px').s('marginTop', '-5px'),
-               body)
-      .s('border', '1px solid black').s('textAlign', 'left'),s('padding', '5px').s('margin', '5px');
+    var body = span('function ',
+      b(name_rest[1]).s('background', 'lightgreen').a('onclick', remove),
+      name_rest[2])
+        .a('contentEditable', true);
+    var xit = tt('X')
+        .a('onclick', remove)
+        .s('float', 'right').s('fontSize', '18px').s('paddingLeft', '10px').s('marginTop', '-5px');
+    return pre(xit, body)
+      .s('border', '1px solid black').s('textAlign', 'left').s('padding', '5px').s('margin', '5px');
 //      <tt onClick={remove} style={{float: 'right', fontSize: '18px', marginRight: '-10px', marginTop: '10px'}}>save</tt>
   });
 
