@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // langauge elements
-export function Ref(name) {
+function Ref(name) {
   this.val = function(env) {
     if (!env) return;
     if (env[name]) return env[name];
@@ -12,16 +12,16 @@ export function Ref(name) {
   this.name = name;
 }
 
-export function ref(name) {
+function ref(name) {
   return new Ref(name);
 }
 
-export function Vertical(list) {
+function Vertical(list) {
   //this.list = Array.prototype.slice.call(list);
   this.list = list;
 }
 
-export function vertical() {
+function vertical() {
   return new Vertical(arguments);
 }
 
@@ -29,7 +29,7 @@ export function vertical() {
 //{ var x = ref('a'); console.log(x(x)); }
 //console.log((ref('a')) instanceof Ref);
 
-export function Apply(fun, args) {
+function Apply(fun, args) {
   //console.log("APPLY(", fun, args, ")");
   // find any array pos loop over it's elements, recurse
   var i = 0;
@@ -50,14 +50,14 @@ export function Apply(fun, args) {
 
 //console.log(function(a){return a*a;}, [3]);
 
-export function Runn(prog, env, prev) {
+function Runn(prog, env, prev) {
   console.log("RUN=>", prog, 'env=', env, 'prev=', prev);
   var r = Runn(prog, env, prev);
   console.log("<=RUN", r, "of", prog);
   return r;
 }
 
-export function Run(prog, env, prev) {
+function Run(prog, env, prev) {
   if (!env) env = {}; // start an env
   if (!prog) return;
   //  if (prog instanceof Ref) return Run(prog.val(env), env);
@@ -98,7 +98,7 @@ export function Run(prog, env, prev) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // initial functions
-export function to(f, t) {
+function to(f, t) {
   var i, r = [];
   for(i = f; i <= t; i++) {
     r.push(i);
@@ -107,20 +107,20 @@ export function to(f, t) {
 }
 to.doc = "Give the numbers in the interval, inclusive";
 
-export function sqr(r){ return r*r;}
+function sqr(r){ return r*r;}
 sqr.doc = "Square the number";
 
-export function lt(x,y){ return x < y ? x : undefined; }
+function lt(x,y){ return x < y ? x : undefined; }
 lt.doc = "Keep if less than";
 
-export function mult(a,b){ return a*b; }
+function mult(a,b){ return a*b; }
 mult.doc = "Multiply it with ";
 
-export function plus(a,b){ return a+b; }
+function plus(a,b){ return a+b; }
 plus.doc = "Plus it with ";
  
 
-export var funcs = [to, sqr, lt, mult, plus];
+var funcs = [to, sqr, lt, mult, plus];
 funcs.forEach(function(x){
   funcs[x.name] = x;
 });
@@ -140,7 +140,7 @@ Object.keys(localStorage).forEach(function(k){
   funcs.push(f);
 });
 
-export function register(f, name) {
+function register(f, name) {
   // need replace if there
   if (!funcs[name]) {
     funcs.push(f);
@@ -156,7 +156,7 @@ export function register(f, name) {
   localStorage['func/' + name] = f.toString();
 }
 
-export function Print(p) {
+function Print(p) {
   var r = '';
   if (p === null || p === undefined || typeof(p) === 'number' || typeof(p) === 'string') return '' + p;
   if (typeof(p) === 'function') return '#' + p.name;
@@ -183,7 +183,7 @@ export function Print(p) {
   return '' + p;
 }
 
-export function Map(p, f) {
+function Map(p, f) {
   if (p === null || p === undefined || typeof(p) === 'number' || typeof(p) === 'string') return f(p);
   if (typeof(p) === 'function') return f(p);
   if (p instanceof Ref) return f(p);
@@ -209,8 +209,6 @@ export function Map(p, f) {
   return p;
 }
 
-export function Copy(p) {
+function Copy(p) {
   return Map(p, (x) => x);
 }
-
-export default funcs;

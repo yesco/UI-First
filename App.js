@@ -1,9 +1,4 @@
-import React from 'react';
-import './App.css';
-
-import {register, funcs, Ref, Run, Vertical} from './UI-lang';
-
-function Press(props) {
+function Press(body) {
   var timer;
   function down(e) {
     e.preventDefault();
@@ -11,7 +6,7 @@ function Press(props) {
       clearTimeout(timer);
       timer = undefined;
       console.log("PRESS");
-      if (props.onLongPress) props.onLongPress(e);
+      if (this.onLongPress) this.onLongPress(e);
     }, 250);
   }
   function up(e) {
@@ -19,15 +14,11 @@ function Press(props) {
     if (timer) {
       clearTimeout(timer);
       console.log("CLICK");
-      if (props.onTap) props.onTap(e);
+      if (this.onTap) this.onTap(e);
     }
     timer = undefined;
   }
-  return (
-    <span onMouseDown={down} onTouchStart={down} onMouseUp={up} onTouchEnd={up}>
-      {props.children}
-    </span>
-  );
+  return span(body).a('onMouseDown', down).a('onTouchStart', down).a('onMouseUp', up).a('onTouchEnd', up);
 }
 
 //console.log(Run([1, 2, function(a,b){return a+b;}]));
@@ -54,10 +45,10 @@ function showSource(e, f){
   }
 }
 
-function Program(props) {
-  var prog = props.prog;
-  var res = props.res || [];
-  if (prog === null || prog === undefined) return <div style={{height: '10px', background: 'white'}}></div>;
+function Program(prog, res) {
+//  console.log("Program", prog);
+  res = res || [];
+  if (prog === null || prog === undefined) return div().s('height', '10px').s('background', 'white');
 
   function add() {
     var v = parseValue(prompt("Add Expression"));
@@ -89,30 +80,21 @@ function Program(props) {
       // onLongPress only work on touch?
       // <td onContextMenu={del} delayLongPress={500} onLongPress={del}>
       // <hidden style={{marginLeft: '20px', marginTop: '-50px', fontSize: '13px'}} onClick={showSource}>definition</hidden>
-      return (
-        <td key={i} className='ui'><Press onTap={edit}>
-          <Program prog={item} res={res[i]}/>
-          <hidden onClick={del}>x</hidden>
-        </Press></td>
-      );
+      return td(Press(Program(item, res), h('hidden', 'x').a('onClick', del)).a('onTap', edit)).c('ui');
     });
 
     //cols.push(<td></td>); // make sure there are always two+ columns, otherwise the add will be wide
-    cols.push(<td key='new' onClick={add} title="Add" style={{background: 'limegreen', width: '10px'}}>&nbsp;</td>);
+    cols.push(td(unsafehtml('&nbsp;')).a('onClick', add).a('title', "Add").s('background', 'limegreen').s('width', '15px'));
     
     // Show result under
     if (0) {
       // show result below
-      return (
-        <center>
-          <table style={{width: '100%'}}><tbody>
-             <tr style={{background: ''}}>{cols}</tr>
-             <tr style={{align: 'center', background: 'white'}}><td>
-               {props.res !== undefined? '=> '+ props.res : '' }
-             </td></tr>
-          </tbody></table>
-        </center>
-      )
+      return center(table(tbody(
+        tr().s('background', '100%'),
+        tr(res !== undefined? '=> '+ res : '')
+          .s('align', 'center').s('background', 'white')))
+                    .s('width', '100%'));
+
     } else {
       // Show result on side
       // click to maximize and minimize
@@ -144,36 +126,31 @@ function Program(props) {
         else 
           max(e);
       }
-      var hasRes = props.res && (props.res instanceof Array && props.res.length > 0);
-      return (
-        <center>
-          <table style={{width: '100%'}}><tbody>
-            <tr style={{background: ''}}>
-              {cols}
-              <td style={{paddingLeft: '10px', width: '150px', maxWidth: '150px', align: 'center', background: props.res?'white':'', overflow: 'auto', wordBreak: 'break-all'}}>
-                <div style={{maxHeight: '100px'}} onClick={toggle}>{props.res ? '=> '+ props.res : '' }</div>
-              </td>
-            </tr>
-          </tbody></table>
-        </center>
-      );
-    }
+      var hasRes = res && (res instanceof Array && res.length > 0);
+      return center(table(tbody(tr(
+        cols,
+        td(res ? '=> ' + res : '')
+          .s('paddingleft', '10px').s('width', '150px').s('maxHeight', '100px')
+          .s('maxWidth', '150px').s('align', 'center').s('background', res?'white':'')
+          .s('overflow', 'auto').s('wordBreak', 'break-all'))))
+                    .s('background', '').s('width', '100%'));
+      }
   }
+  
 
   if (prog instanceof Ref)
     ;// later
   else if (typeof(prog) === 'object') {
     // display row
-    const rows = Object.keys(prog).map((key, i) => {
-      const label = <b style={{float: 'left', margin: '-5px', fontSize: '10px', background: 'white', border: '1px solid black', borderRadius: '5px', padding: '3px'}}>{key}:</b>;
+    var rows = Object.keys(prog).map(function(key, i){
+      var label = b(key)
+        .s('float', 'left').s('margin', '-5px').s('fontSize', '10px')
+        .s('background', 'white').s('border', '1px solid black').s('borderRadius', '5px').s('padding', '3px');
       // TODO: this causes program not to render, at error, lol, lol
       //if (!res[key]) return null;
-      return (
-          <tr key={i}><td>
-          {key.match(/^[_0-9]/) ? "" : label}
-          <Program key={key} prog={prog[key]} res={res[key]}/>
-        </td></tr>
-      );
+      return tr(td(
+        key.match(/^[_0-9]/) ? "" : label,
+        Program(prog[key], res[key])));
     });
 
     function addLine() {
@@ -189,16 +166,11 @@ function Program(props) {
       window.changed();
     }
 
-    rows.push(<tr key='new'><td style={{background: 'limegreen'}} onClick={addLine}>&nbsp;</td></tr>);
+    rows.push(tr(td(unsafehtml('&nbsp;')).s('background', 'limegreen').a('onClick', addLine)));
 //          <div style={{background: 'silver', 'text-align': 'center', padding: '10px', 'borderRadius': '10px'}}>
 //            {''+res[key]}
 //          </div>
-    return (
-//      <table>
-      <table style={{background: 'lightgreen', padding: '0px', border: '0px', margin: '0px'}}>
-        <tbody>{rows}</tbody>
-      </table>
-    );
+    return table(tbody(rows)).s('background', 'lightgreen').s('padding', '0px').s('border', '0px').s('margin', '0px');
   }
 
   function input(e) {
@@ -214,38 +186,31 @@ function Program(props) {
   else if (typeof prog === 'string') {
     color = 'white';
     // TODO: title='create function - rightclick' 
-    txt = <Press onLongPress={input}>{prog}</Press>
+    txt = Press(prog).a('onLongPress', input);
   } else if (prog instanceof Ref) {
     color = 'cyan';
-    txt = <i>{prog.name}</i>
+    txt = i(prog.name);
   } else if (typeof prog === 'function') {
     color = '#66FF99';
-    txt = (
-      <Press onLongPress={(e) => showSource(e, prog)}>
-        <b title={prog.doc}>{prog.name}</b>
-      </Press>
-    );
+    txt = Press(b(prog.name).a('title', prog.doc))
+      .a('onLongPress', function(e){ showSource(e, prog); });
   } else {
     color = 'red';
     txt = '' + prog;
   }
-  return <div style={{padding: '6px'}}>
-    <div style={{textAlign: 'center', padding: '7px', background: color}}>
-      {txt}
-    </div>
-  </div>;
+  return div(
+    div(txt).s('textAlign', 'center').s('padding', '7px').s('background', color))
+    .s('padding', '6px');
 }
 
-function App(props) {
-  var prog = props.prog;
+function App(prog, editors) {
   try {
     var res = Run(prog);
   } catch (e) {
     alert(e);
   }
-  var editors = props.editors;
 
-  var fs = funcs.map((f) => <span key={f} onClick={(e) => showSource(e, f)}> {f.name} </span>);
+  var fs = funcs.map(function(f){return span(f.name, ' ').a('onClick', function(e){ showSource(e, f) })});
 
   var eds = editors.map(function(f){
     function remove(e){
@@ -256,7 +221,7 @@ function App(props) {
         register(r, name);
 
         // Remove from list and display
-        window.editors = window.editors.filter((x) => (x !== f));
+        window.editors = window.editors.filter(function(x){ return x !== f; });
         window.changed(function(x){return (x === name || x.name === name)? r : x; });
       } catch (e) {
         alert(e);
@@ -264,34 +229,24 @@ function App(props) {
     }
 
     var name_rest = f.toString().match(/function (\w+)([\s\S]*)/m);
-    var s = <span contentEditable='true'>function <b style={{background: 'lightgreen'}} onClick={remove}>{name_rest[1]}</b>{name_rest[2]}</span>;
-    return <pre style={{border: '1px solid black', textAlign: 'left', padding: '5px', margin: '5px'}}>
-      <tt onClick={remove} style={{float: 'right', fontSize: '18px', paddingLeft: '10px', marginTop: '-5px'}}>X</tt>
-      {s}
-      <span style={{background: 'pink'}}></span>
-    </pre>
+    var body = span(b(name_rest[1], name_rest[2])
+      .s('background', 'lightgreen'))
+      .a('contentEditable', true).a('onClick', remove);
+    return pre(tt('X')
+               .a('onClick', remove)
+               .s('float', 'right').s('fontSize', '18px').s('paddingLeft', '10px').s('marginTop', '-5px'),
+               body)
+      .s('border', '1px solid black').s('textAlign', 'left'),s('padding', '5px').s('margin', '5px');
 //      <tt onClick={remove} style={{float: 'right', fontSize: '18px', marginRight: '-10px', marginTop: '10px'}}>save</tt>
   });
 
   var sortk = Object.keys(res).sort();
   var last = res[sortk[sortk.length-1]];
 
-  return (
-    <div className="App">
-      <div className="App-header">
-        <h2>UI-First</h2>
-        <b><small>(C) 2017 Jonas S Karlsson</small></b>
-      </div>
-      <div>{fs}</div>
-      <br/><br/>
-      <div style={{float: 'right'}}>{eds}</div>
-      <center><table><tbody><tr><td>
-        <Program prog={prog} res={res}/>
-      </td></tr></tbody></table></center>
-      <div style={{background: 'white'}}>{last}</div>
-
-    </div>
-  );
+  return div(div(h2('UI-First'), b(small('(C) 2017 Jonas S Karlsson'))).c('App-header'),
+             div(fs), br(), br(),
+             div(eds).s('float', 'right'),
+             center(table(tbody(tr(td(Program(prog, res)))))),
+             div(last.toString()).s('background', 'white')
+            ).c('App');
 }
-
-export default App;

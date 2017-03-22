@@ -1,4 +1,0 @@
-Stuff
-
-## Table of Contents
-
